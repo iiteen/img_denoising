@@ -1,4 +1,4 @@
-import os, time, scipy.io
+import os, time
 import numpy as np
 from PIL import Image
 import glob
@@ -8,12 +8,12 @@ import torch.nn as nn
 import torch.optim as optim
 
 from skimage.metrics import peak_signal_noise_ratio as compare_psnr
-from skimage.metrics import structural_similarity as compare_ssim
-
-import matplotlib.pyplot as plt
 
 from Denoise import Denoise
 import argparse
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # Argument for denoise
 parser = argparse.ArgumentParser(description="denoise")
@@ -32,8 +32,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-input_dir = "/content/drive/MyDrive/dataset/trainsplit/low/"
-gt_dir = "/content/drive/MyDrive/dataset/trainsplit/high/"
+input_dir = "../dataset/trainsplit/low/"
+gt_dir = "../dataset/trainsplit/high/"
 model_dir = "./Model/"
 test_name = (
     "denoise-lerelu-ps-" + str(args.patch_size) + "-b-" + str(args.n_resblocks) + "/"
@@ -41,7 +41,7 @@ test_name = (
 
 
 save_freq = 5
-total_epoch = 21
+total_epoch = 501
 
 
 # get train and test IDs
@@ -97,7 +97,7 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
 
 # Load the latest model if available
 if latest_model:
-    checkpoint = torch.load(latest_model,map_location=device)
+    checkpoint = torch.load(latest_model, map_location=device)
     model.load_state_dict(checkpoint)
     print(f"Resuming training from epoch {lastepoch}")
 
@@ -108,7 +108,6 @@ for epoch in range(lastepoch, total_epoch):
     if os.path.isdir("result/%04d" % epoch):
         continue
     cnt = 0
-
     for ind in np.random.permutation(len(train_ids)):
         # get the path from image id
         train_id = train_ids[ind]
@@ -168,23 +167,9 @@ for epoch in range(lastepoch, total_epoch):
         g_loss[ind] = loss.detach().cpu().numpy()
 
         psnr.append(compare_psnr(gt_img[:, :, :], out_img[:, :, :]))
-        ssim.append(
-            compare_ssim(gt_img[:, :, :], out_img[:, :, :], multichannel=True)
-        )
 
-        print(
-            "%d %d Loss=%.3f Time=%.3f"
-            % (epoch, cnt, np.mean(g_loss[np.where(g_loss)]), time.time() - st),
-            "psnr: ",
-            psnr[-1],
-            "ssim: ",
-            ssim[-1],
-        )
-
-    print("\n\n---------------------------------")
-    print("mean psnr: ", np.mean(psnr))
-    print("mean ssim: ", np.mean(ssim))
-    print("---------------------------------\n\n")
+    logging.info("---------------------------------")
+    logging.info("%d mean psnr: %.4f", epoch, np.mean(psnr))
 
     scheduler.step(
         np.mean(g_loss[np.where(g_loss)])
