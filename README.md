@@ -31,8 +31,8 @@ This network demonstrated significant improvements in noise reduction while pres
 Clone the repository and install the required dependencies.
 
 ```bash
-git clone https://github.com/username/repo.git
-cd repo
+git clone https://github.com/iiteen/img_denoising.git
+cd img_denoising
 ```
 
 ## Note
@@ -50,4 +50,4 @@ cd repo
     conda install scikit-image
     conda install matplotlib
     ```
-- for other os refer to `https://pytorch.org/get-started/locally/` for creating compatible GPU enabled enviroment. 
+- for other os refer to [pytorch](https://pytorch.org/get-started/locally/) for creating compatible GPU enabled enviroment. 
