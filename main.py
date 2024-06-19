@@ -39,7 +39,7 @@ args = parser.parse_args()
 torch.manual_seed(0)
 
 input_dir = "./test/low/"
-m_path = "./Model/denoise-lerelu-ps-300-b-31/"
+m_path = "./Model/denoise-lerelu-ps-300-b-32/"
 m_name = "denoise_e0035.pth"
 result_dir = "./test/predicted/"
 
